@@ -1,0 +1,5 @@
+export enum AuthStatus {
+  NOT_AUTHENTICATED,
+  AUTHENTICATED,
+  CHECKING_AUTH,
+}
