@@ -1,17 +1,19 @@
 import {
   Calendar,
   DateLocalizer,
-  Event,
   View,
   dateFnsLocalizer,
 } from "react-big-calendar";
 import "react-big-calendar/lib/css/react-big-calendar.css";
-import { format, parse, startOfWeek, getDay, addHours } from "date-fns";
+import { format, parse, startOfWeek, getDay } from "date-fns";
 import es from "date-fns/locale/es";
 import { getMessagesEs } from "../helpers/getMessages";
 import { CalendarEventBox } from "./CalendarEventBox";
 
 import { useState } from "react";
+import { useUiStore } from "../../hooks/useUiStore";
+import { useCalendarStore } from "../../hooks/useCalendarStore";
+import { CalendarEvent } from "../../store";
 const locales = {
   es: es,
 };
@@ -24,24 +26,23 @@ const localizer: DateLocalizer = dateFnsLocalizer({
   locales,
 });
 
-const myEventList: Event[] = [
-  {
-    title: "Mi cumpleaños",
-    resource: { user: { name: "Jorge" } },
-    start: new Date(),
-    end: addHours(new Date(), 2),
-  },
-];
 
 const CalendarComponent = () => {
+  const {calendarEvents,setActiveCalEvent} = useCalendarStore();
+  const {openDateModal} = useUiStore();
+
   const lastViewValue = localStorage.getItem("lastView")
     ? JSON.parse(localStorage.getItem("lastView")!)
     : "month";
 
   const [lastView, setLastView] = useState(lastViewValue);
 
-  const handleDoubleClick = (event: Event) => {
-    console.log({ dbClick: event });
+  const handleClick= (calEvent:CalendarEvent)=>{
+    setActiveCalEvent(calEvent);
+  }
+
+  const handleDoubleClick = () => {
+    openDateModal();
   };
 
   const handleViewChanged = (view: View) => {
@@ -52,7 +53,7 @@ const CalendarComponent = () => {
     <Calendar
       localizer={localizer}
       culture="es"
-      events={myEventList}
+      events={calendarEvents}
       defaultView={lastView}
       startAccessor="start"
       endAccessor="end"
@@ -61,6 +62,7 @@ const CalendarComponent = () => {
       components={{ event: CalendarEventBox }}
       onDoubleClickEvent={handleDoubleClick}
       onView={handleViewChanged}
+      onSelectEvent={handleClick}
     ></Calendar>
   );
 };
