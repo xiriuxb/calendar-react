@@ -1,6 +1,7 @@
 import {
   Calendar,
   DateLocalizer,
+  EventPropGetter,
   View,
   dateFnsLocalizer,
 } from "react-big-calendar";
@@ -10,10 +11,11 @@ import es from "date-fns/locale/es";
 import { getMessagesEs } from "../helpers/getMessages";
 import { CalendarEventBox } from "./CalendarEventBox";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useUiStore } from "../../hooks/useUiStore";
 import { useCalendarStore } from "../../hooks/useCalendarStore";
 import { CalendarEvent } from "../../store";
+import { useAuthStore } from "../../hooks";
 const locales = {
   es: es,
 };
@@ -26,10 +28,15 @@ const localizer: DateLocalizer = dateFnsLocalizer({
   locales,
 });
 
-
 const CalendarComponent = () => {
-  const {calendarEvents,setActiveCalEvent} = useCalendarStore();
-  const {openDateModal} = useUiStore();
+  const { calendarEvents, setActiveCalEvent, startLoadingEvents } =
+    useCalendarStore();
+  const { openDateModal } = useUiStore();
+  const { user } = useAuthStore();
+
+  useEffect(() => {
+    startLoadingEvents();
+  }, []);
 
   const lastViewValue = localStorage.getItem("lastView")
     ? JSON.parse(localStorage.getItem("lastView")!)
@@ -37,9 +44,9 @@ const CalendarComponent = () => {
 
   const [lastView, setLastView] = useState(lastViewValue);
 
-  const handleClick= (calEvent:CalendarEvent)=>{
+  const handleClick = (calEvent: CalendarEvent) => {
     setActiveCalEvent(calEvent);
-  }
+  };
 
   const handleDoubleClick = () => {
     openDateModal();
@@ -49,6 +56,21 @@ const CalendarComponent = () => {
     localStorage.setItem("lastView", JSON.stringify(view));
     setLastView(view);
   };
+
+  const myEventPropGetter: EventPropGetter<any> = (
+    event: CalendarEvent,
+  ) => {
+    const style = {
+      backgroundColor:
+        event.resource.user._id === user.uid ? "#347CF7" : "#465660",
+      borderRadius: "0px",
+      opacity: 0.8,
+      color: "white",
+    };
+
+    return { style };
+  };
+
   return (
     <Calendar
       localizer={localizer}
@@ -57,9 +79,10 @@ const CalendarComponent = () => {
       defaultView={lastView}
       startAccessor="start"
       endAccessor="end"
-      style={{ height: 500 }}
+      style={{ height: 'calc( 100vh - 80px )'}}
       messages={getMessagesEs()}
       components={{ event: CalendarEventBox }}
+      eventPropGetter={myEventPropGetter}
       onDoubleClickEvent={handleDoubleClick}
       onView={handleViewChanged}
       onSelectEvent={handleClick}

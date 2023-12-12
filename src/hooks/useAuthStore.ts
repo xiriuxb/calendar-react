@@ -1,5 +1,5 @@
 import { useDispatch, useSelector } from "react-redux"
-import { RootState, clearErrormessage, onBadLogin, onChecking, onLogin } from "../store";
+import { RootState, clearErrormessage, handleLogoutCalendar, onBadLogin, onChecking, onLogin } from "../store";
 import { calendarApi } from "../api";
 import { AxiosError } from "axios";
 
@@ -64,6 +64,7 @@ export const useAuthStore = () =>{
 
     const startLogout = () =>{
         localStorage.clear();
+        dispatch(handleLogoutCalendar());
         dispatch(onBadLogin(''));
     }
 

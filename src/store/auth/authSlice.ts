@@ -3,6 +3,7 @@ import { AUTH_STATUS } from '../../auth/types/AuthStatus';
 
 interface UserInfo {
     name?:string
+    uid?:string
 }
 
 interface AuthState{

@@ -1,29 +1,37 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { addHours } from "date-fns";
 import { Event } from "react-big-calendar";
+import { backEventToFrontEvent } from "../../helpers";
 
 export interface CalendarEvent extends Event {
+  _id?: string;
+}
+
+export interface UserResponse {
+  name: string;
   _id: string;
+}
+
+export interface EventsResponse {
+  id: string;
+  start: string | Date;
+  end: Date;
+  title: string;
+  notes: string;
+  user: UserResponse;
 }
 
 interface CalendarState {
   calEvents: CalendarEvent[];
   activeCalEvent: CalendarEvent | null;
+  isLoadingEvents: boolean;
 }
 
-const myEventList: CalendarEvent[] = [
-  {
-    _id: "1",
-    title: "Mi cumpleaños",
-    resource: { user: { name: "Jorge" }, notes: "No lo sé Rick" },
-    start: new Date(),
-    end: addHours(new Date(), 2),
-  },
-];
+const myEventList: CalendarEvent[] = [];
 
 export const calendarSlice = createSlice({
   name: "calendar",
   initialState: {
+    isLoadingEvents: false,
     calEvents: myEventList,
     activeCalEvent: null,
   } as CalendarState,
@@ -44,13 +52,37 @@ export const calendarSlice = createSlice({
       });
     },
     handelDeleteEvent: (state) => {
-      if(state.activeCalEvent){
-        state.calEvents = state.calEvents.filter(el=>el._id!==state.activeCalEvent?._id);
+      if (state.activeCalEvent) {
+        state.calEvents = state.calEvents.filter(
+          (el) => el._id !== state.activeCalEvent?._id
+        );
         state.activeCalEvent = null;
       }
+    },
+    handleLoadEvents: (state, action) => {
+      state.isLoadingEvents = false;
+      action.payload.forEach((event: EventsResponse) => {
+        const exist = state.calEvents.some(
+          (dbEvent: CalendarEvent) => dbEvent._id === event.id
+        );
+        if (!exist) {
+          state.calEvents.push(backEventToFrontEvent(event));
+        }
+      });
+    },
+    handleLogoutCalendar: (state) => {
+      state.isLoadingEvents = true;
+      state.activeCalEvent = null;
+      state.calEvents = [];
     },
   },
 });
 
-export const { handleActiveEvent, handleAddNewEvent, handleUpdateEvent, handelDeleteEvent } =
-  calendarSlice.actions;
+export const {
+  handleActiveEvent,
+  handleAddNewEvent,
+  handleUpdateEvent,
+  handelDeleteEvent,
+  handleLoadEvents,
+  handleLogoutCalendar,
+} = calendarSlice.actions;

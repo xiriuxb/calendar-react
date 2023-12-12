@@ -9,7 +9,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import es from "date-fns/locale/es";
 import { useUiStore } from "../../hooks/useUiStore";
 import { useCalendarStore } from "../../hooks/useCalendarStore";
-
+import { useAuthStore } from "../../hooks";
 const customStyles = {
   content: {
     top: "50%",
@@ -26,6 +26,7 @@ export const CalendarModal = () => {
   const { isDateModalOpen, closeDateModal } = useUiStore();
   const { activeCalEvent, startSavingEvent } = useCalendarStore();
   const [formSubmitted, setFormSubmitted] = useState<boolean>(false);
+  const {user} = useAuthStore();
   const [formValues, setFormValues] = useState({
     title: "",
     notes: "",
@@ -76,11 +77,11 @@ export const CalendarModal = () => {
     if (formValues.title.length <= 2) return;
 
     startSavingEvent({
-      _id: activeCalEvent?._id ? activeCalEvent._id : '',
+      _id: activeCalEvent?._id ? activeCalEvent._id : undefined,
       title: formValues.title,
       start: formValues.startDate,
       end: formValues.endDate,
-      resource: { user: { name: "jorge" }, notes: formValues.notes },
+      resource: { user: {name:user.name, _id:user.uid}, notes: formValues.notes },
     });
     closeDateModal();
     setFormSubmitted(false);
