@@ -20,7 +20,7 @@ export interface EventsResponse {
   user: UserResponse;
 }
 
-interface CalendarState {
+export interface CalendarState {
   calEvents: CalendarEvent[];
   activeCalEvent: CalendarEvent | null;
   isLoadingEvents: boolean;
@@ -71,7 +71,7 @@ export const calendarSlice = createSlice({
       });
     },
     handleLogoutCalendar: (state) => {
-      state.isLoadingEvents = true;
+      state.isLoadingEvents = false;
       state.activeCalEvent = null;
       state.calEvents = [];
     },
